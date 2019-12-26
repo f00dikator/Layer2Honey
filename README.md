@@ -1,5 +1,5 @@
 # Layer2Honey
-The start of a Layer 2 honeypot
+The start of a Layer 2 honeypot - Code is rough as *Hades* right now...it works...but it's uggggggggly....
 
 This honeypot should:
 1) Never initiate traffic above layer 2
