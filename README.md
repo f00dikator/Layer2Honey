@@ -18,11 +18,12 @@ Optional:
   - perhaps flag on all dstPort < 1024
 
 
-To Run:
-./MacHoney -config config.yml
-
 Config.yml needs:
   - interface (string)
   - interface IP (string)
   - interface MAC (string)
   - gateway MAC (string) ... e.g. the Mac addr of the default gateway which proxy arps...don't want that...
+
+To Run:
+./build.sh && ./MacHoney -config config.yml
+
