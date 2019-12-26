@@ -1,0 +1,5 @@
+l2:
+  interface: "en0"
+  gatewaymac: "f0:82:61:56:95:32"
+  interfacemac: "a4:83:e7:2d:02:19"
+  interfaceip: "192.168.254.4"
