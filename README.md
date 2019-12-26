@@ -10,9 +10,12 @@ This honeypot should:
 6) alert when we get a packet that is destined for layer 3 and above
 
 Optional:
-maintain a list of ports that we will alert on if #6 occurs
-setup pseudo listeners for ports from above
-perhaps flag on all dstPort < 1024
+
+  - maintain a list of ports that we will alert on if #6 occurs
+  
+  - setup pseudo listeners for ports from above
+ 
+  - perhaps flag on all dstPort < 1024
 
 
 To Run:
