@@ -13,3 +13,13 @@ Optional:
 maintain a list of ports that we will alert on if #6 occurs
 setup pseudo listeners for ports from above
 perhaps flag on all dstPort < 1024
+
+
+To Run:
+./MacHoney -config config.yml
+
+Config.yml needs:
+  - interface (string)
+  - interface IP (string)
+  - interface MAC (string)
+  - gateway MAC (string) ... e.g. the Mac addr of the default gateway which proxy arps...don't want that...
