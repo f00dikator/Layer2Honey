@@ -2,7 +2,7 @@
 The start of a Layer 2 honeypot - Code is rough as *Hades* right now...it works...but it's uggggggggly....
 
 This honeypot should:
-1) Never initiate traffic above layer 2
+1) Never initiate traffic above layer 2 (e.g, be able to probe and enumerate machines without hitting firewall rules)
 2) Be able to find all Mac addrs on a broadcast domain and enumerate them
 3) Map all live Macs to the most current live IP 
 4) insert our mac into the arp cache of all domain machines every 30 seconds
