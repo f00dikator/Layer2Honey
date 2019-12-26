@@ -213,7 +213,7 @@ func writeArpResponse(handle *pcap.Handle, iface *net.Interface, addr *net.IPNet
 	// Set up all the layers' fields we can.
 	eth := layers.Ethernet{
 		SrcMAC:       iface.HardwareAddr,
-		DstMAC:       net.HardwareAddr{0xff, 0xff, 0xff, 0xff, 0xff, 0xff},		// this needs to be the discovered mac
+		DstMAC:       net.HardwareAddr{0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 		EthernetType: layers.EthernetTypeARP,
 	}
 	arp := layers.ARP{
@@ -237,6 +237,8 @@ func writeArpResponse(handle *pcap.Handle, iface *net.Interface, addr *net.IPNet
 		strIP := fmt.Sprintf("%v.%v.%v.%v", ip[0], ip[1], ip[2], ip[3])
 		if len(IPToMac[strIP]) > 0 {
 			arp.DstHwAddress = IPToMac[strIP]
+			eth.DstMAC = IPToMac[strIP]
+			
 			gopacket.SerializeLayers(buf, opts, &eth, &arp)
 			if err := handle.WritePacketData(buf.Bytes()); err != nil {
 				fmt.Printf("\nError calling WritePacketData()\n")
