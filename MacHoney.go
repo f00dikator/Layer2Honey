@@ -48,31 +48,23 @@ func main() {
 		dstMac := fmt.Sprintf("%v", packet.LinkLayer().LinkFlow().Dst())
 		srcMac := fmt.Sprintf("%v", packet.LinkLayer().LinkFlow().Src())
 		SynchMacList(srcMac)
-		if packet.NetworkLayer() == nil {
+		if packet.NetworkLayer() == nil  && srcMac != config.gatewaymac {
 			// handle just our ARP traffic first
-			if srcMac != config.gatewaymac {
-				now = time.Now()
-				currentTime := now.Unix()
-				if (currentTime - scriptStartTime) > 60 {
-					if len(MacToInterface[dstMac]) > 0 {
-						arpCode, err := CheckArpCode(packet.Data())
-						if len(err) > 0 {
-							fmt.Printf("Error retrieving opcode of arp packet. Error: %v", err)
-						}
-						// arp opcode 0x0002 is an Arp Reply. We have a thread sending Arp requests...ignore those responses...
-						if arpCode != 2 {
-							// see if we have already flagged on this mofo
-							if len(HabitualOffenders[srcMac]) <= 0 {
-								// ignore broadcast
-								if (srcMac != "ff:ff:ff:ff:ff:ff") && (dstMac != "ff:ff:ff:ff:ff:ff") {
-									fmt.Printf("Captured an Arp Probe to our mac %v from %v Opcode %v\n", dstMac, srcMac, arpCode)
-									HabitualOffenders[srcMac] = srcMac
-								}
-							}
-						}
+			now = time.Now()
+			currentTime := now.Unix()
+			if (currentTime - scriptStartTime) > 60 &&
+				len(MacToInterface[dstMac]) > 0 {
+					arpCode, err := CheckArpCode(packet.Data())
+					if len(err) > 0 {
+						fmt.Printf("Error retrieving opcode of arp packet. Error: %v", err)
 					}
+					// arp opcode 0x0002 is an Arp Reply. We have a thread sending Arp requests...ignore those responses...
+					if arpCode != 2  && len(HabitualOffenders[srcMac]) <= 0 &&
+						(srcMac != "ff:ff:ff:ff:ff:ff") && (dstMac != "ff:ff:ff:ff:ff:ff") {
+						fmt.Printf("Captured an Arp Probe to our mac %v from %v Opcode %v\n", dstMac, srcMac, arpCode)
+						HabitualOffenders[srcMac] = srcMac
+						}
 
-				}
 			}
  		}
 
@@ -88,12 +80,10 @@ func main() {
 					ipTxt := fmt.Sprintf("%v", ip.SrcIP)
 					dstIP := fmt.Sprintf("%v", ip.DstIP)
 					// avoid broadcast traffic. Ensure that packet has a dstIP of us
-					if dstIP == config.interfaceip {
+					if dstIP == config.interfaceip && len(HabitualOffenders[ipTxt]) <= 0 {
 						// see if we have already flagged on this mofo
-						if len(HabitualOffenders[ipTxt]) <= 0 {
-							fmt.Printf("Captured a probe at layer 3/4 %v:%v -> %v:%v\n\n", ip.SrcIP, srcPort, ip.DstIP, dstPort)
-							HabitualOffenders[ipTxt] = ipTxt
-						}
+						fmt.Printf("Captured a probe at layer 3/4 %v:%v -> %v:%v\n\n", ip.SrcIP, srcPort, ip.DstIP, dstPort)
+						HabitualOffenders[ipTxt] = ipTxt
 					}
 				}
 			}
