@@ -69,7 +69,7 @@ func main() {
  		}
 
 
-		// Now, let's see what we have (if anything) at layer 3
+		// Now, let's see what we have (if anything) at layer 4
 		if packet.TransportLayer() != nil {
 			dstPort := packet.TransportLayer().TransportFlow().Dst()
 			srcPort := packet.TransportLayer().TransportFlow().Src()
@@ -85,7 +85,22 @@ func main() {
 						fmt.Printf("Captured a probe at layer 3/4 %v:%v -> %v:%v\n\n", ip.SrcIP, srcPort, ip.DstIP, dstPort)
 						HabitualOffenders[ipTxt] = ipTxt
 					}
+				} else {
+					dstIP := fmt.Sprintf("%v", packet.TransportLayer().TransportFlow().Dst())
+					ipTxt := fmt.Sprintf("%v", packet.TransportLayer().TransportFlow().Src())
+					if dstIP == config.interfaceip && len(HabitualOffenders[ipTxt]) <= 0 {
+						fmt.Printf("Captured a Transport-Layer probe from %v", ipTxt)
+						HabitualOffenders[ipTxt] = ipTxt
+					}
 				}
+			}
+			// check layer 3 generic shit (like icmp)
+		} else if (packet.NetworkLayer() != nil) {
+			ipTxt := fmt.Sprintf("%v",packet.NetworkLayer().NetworkFlow().Src())
+			dstIP := fmt.Sprintf("%v",packet.NetworkLayer().NetworkFlow().Dst())
+			if dstIP == config.interfaceip && len(HabitualOffenders[ipTxt]) <= 0 {
+				fmt.Printf("Unspecified layer 3 traffic from %v to %v\n", ipTxt, dstIP)
+				HabitualOffenders[ipTxt] = ipTxt
 			}
 		}
 	}
