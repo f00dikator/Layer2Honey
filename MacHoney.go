@@ -95,7 +95,7 @@ func main() {
 				}
 			}
 			// check layer 3 generic shit (like icmp)
-		} else if (packet.NetworkLayer() != nil) {
+		} else if (packet.NetworkLayer() != nil) && srcMac != config.gatewaymac {
 			ipTxt := fmt.Sprintf("%v",packet.NetworkLayer().NetworkFlow().Src())
 			dstIP := fmt.Sprintf("%v",packet.NetworkLayer().NetworkFlow().Dst())
 			if dstIP == config.interfaceip && len(HabitualOffenders[ipTxt]) <= 0 {
