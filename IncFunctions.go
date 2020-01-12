@@ -31,6 +31,11 @@ type conf struct {
 }
 var config conf
 
+func getTime () string {
+	currentTime := time.Now()
+	return currentTime.String()
+}
+
 func populate_config (c *conf, config_file_name string) {
 	viper.SetConfigFile(config_file_name)
 	viper.SetConfigType("yaml")
