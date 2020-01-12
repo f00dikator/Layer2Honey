@@ -169,7 +169,7 @@ func SynchMacList (macAddr string) {
 		}
 	}
 
-	fmt.Printf("New Mac Detected %v\n", macAddr)
+	fmt.Printf("%v New Mac Detected %v\n", getTime(), macAddr)
 	MacList.PushFront(macAddr)
 
 }
