@@ -31,6 +31,11 @@ type conf struct {
 }
 var config conf
 
+func getTime () string {
+	currentTime := time.Now()
+	return currentTime.String()
+}
+
 func populate_config (c *conf, config_file_name string) {
 	viper.SetConfigFile(config_file_name)
 	viper.SetConfigType("yaml")
@@ -164,7 +169,7 @@ func SynchMacList (macAddr string) {
 		}
 	}
 
-	fmt.Printf("New Mac Detected %v\n", macAddr)
+	fmt.Printf("%v New Mac Detected %v\n", getTime(), macAddr)
 	MacList.PushFront(macAddr)
 
 }

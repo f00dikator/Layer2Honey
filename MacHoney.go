@@ -61,7 +61,7 @@ func main() {
 					// arp opcode 0x0002 is an Arp Reply. We have a thread sending Arp requests...ignore those responses...
 					if arpCode != 2  && len(HabitualOffenders[srcMac]) <= 0 &&
 						(srcMac != "ff:ff:ff:ff:ff:ff") && (dstMac != "ff:ff:ff:ff:ff:ff") {
-						fmt.Printf("Captured an Arp Probe to our mac %v from %v Opcode %v\n", dstMac, srcMac, arpCode)
+							fmt.Printf("%v Captured an Arp Probe to our mac %v from %v Opcode %v\n", getTime(), dstMac, srcMac, arpCode)
 						HabitualOffenders[srcMac] = srcMac
 						}
 
@@ -69,7 +69,7 @@ func main() {
  		}
 
 
-		// Now, let's see what we have (if anything) at layer 3
+		// Now, let's see what we have (if anything) at layer 4
 		if packet.TransportLayer() != nil {
 			dstPort := packet.TransportLayer().TransportFlow().Dst()
 			srcPort := packet.TransportLayer().TransportFlow().Src()
@@ -82,10 +82,25 @@ func main() {
 					// avoid broadcast traffic. Ensure that packet has a dstIP of us
 					if dstIP == config.interfaceip && len(HabitualOffenders[ipTxt]) <= 0 {
 						// see if we have already flagged on this mofo
-						fmt.Printf("Captured a probe at layer 3/4 %v:%v -> %v:%v\n\n", ip.SrcIP, srcPort, ip.DstIP, dstPort)
+						fmt.Printf("%v Captured a probe at layer 3/4 %v:%v -> %v:%v\n\n", getTime(), ip.SrcIP, srcPort, ip.DstIP, dstPort)
+						HabitualOffenders[ipTxt] = ipTxt
+					}
+				} else {
+					dstIP := fmt.Sprintf("%v", packet.TransportLayer().TransportFlow().Dst())
+					ipTxt := fmt.Sprintf("%v", packet.TransportLayer().TransportFlow().Src())
+					if dstIP == config.interfaceip && len(HabitualOffenders[ipTxt]) <= 0 {
+						fmt.Printf("%v Captured a Transport-Layer probe from %v", getTime(), ipTxt)
 						HabitualOffenders[ipTxt] = ipTxt
 					}
 				}
+			}
+			// check layer 3 generic shit (like icmp)
+		} else if (packet.NetworkLayer() != nil) && srcMac != config.gatewaymac {
+			ipTxt := fmt.Sprintf("%v",packet.NetworkLayer().NetworkFlow().Src())
+			dstIP := fmt.Sprintf("%v",packet.NetworkLayer().NetworkFlow().Dst())
+			if dstIP == config.interfaceip && len(HabitualOffenders[ipTxt]) <= 0 {
+				fmt.Printf("%v Unspecified layer 3 traffic from %v to %v\n", getTime(), ipTxt, dstIP)
+				HabitualOffenders[ipTxt] = ipTxt
 			}
 		}
 	}
