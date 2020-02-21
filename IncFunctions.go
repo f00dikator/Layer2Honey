@@ -3,16 +3,18 @@ package main
 import (
 	"container/list"
 	"encoding/binary"
-	"github.com/spf13/viper"
-	"os"
-	"strconv"
-	"time"
 	"fmt"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
+	"github.com/spf13/viper"
+	"io/ioutil"
 	"net"
+	"net/http"
+	"os"
 	"regexp"
+	"strconv"
+	"time"
 	//"sync"
 )
 
@@ -30,11 +32,6 @@ type conf struct {
 	interfaceip string
 }
 var config conf
-
-func getTime () string {
-	currentTime := time.Now()
-	return currentTime.String()
-}
 
 func populate_config (c *conf, config_file_name string) {
 	viper.SetConfigFile(config_file_name)
@@ -168,12 +165,28 @@ func SynchMacList (macAddr string) {
 			return
 		}
 	}
-
-	fmt.Printf("%v New Mac Detected %v\n", getTime(), macAddr)
+	// resolve to a vendor
+	macVendor := getVendor(fmt.Sprintf("%v", macAddr))
+	time.Sleep(1 * time.Second)
+	fmt.Printf("New Mac Detected %v : %v\n", macAddr, macVendor)
 	MacList.PushFront(macAddr)
-
 }
 
+
+func getVendor (myMac string) string {
+	resp, err := http.Get(fmt.Sprintf("https://api.macvendors.com/%v", myMac))
+	if err != nil {
+		return "N/A"
+	} else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "N/A"
+		} else {
+			return string(body)
+		}
+	}
+}
 
 
 // writeARP writes an ARP request for each address on our local network to the
@@ -218,7 +231,7 @@ func writeArpResponse(handle *pcap.Handle, iface *net.Interface, addr *net.IPNet
 	// Set up all the layers' fields we can.
 	eth := layers.Ethernet{
 		SrcMAC:       iface.HardwareAddr,
-		DstMAC:       net.HardwareAddr{0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+		DstMAC:       net.HardwareAddr{0xff, 0xff, 0xff, 0xff, 0xff, 0xff},		// will overwrite below
 		EthernetType: layers.EthernetTypeARP,
 	}
 	arp := layers.ARP{
@@ -243,7 +256,6 @@ func writeArpResponse(handle *pcap.Handle, iface *net.Interface, addr *net.IPNet
 		if len(IPToMac[strIP]) > 0 {
 			arp.DstHwAddress = IPToMac[strIP]
 			eth.DstMAC = IPToMac[strIP]
-			
 			gopacket.SerializeLayers(buf, opts, &eth, &arp)
 			if err := handle.WritePacketData(buf.Bytes()); err != nil {
 				fmt.Printf("\nError calling WritePacketData()\n")
@@ -280,9 +292,12 @@ func IsValidIPNet (IpInfo string) bool {
 			fmt.Printf("\nError converting mask %v to an integer. Error: %v\n", result[2], err)
 			return false
 		}
+		// change mask below back to 22 remove remove remove TODO
 		if (mask >= 22) {
+			//fmt.Printf("Scanning a network of mask %v\n", mask)
 			return true
 		} else {
+			//fmt.Printf("Mask size of %v as too large. Not scanning this broadcast domain\n", mask)
 			return false
 		}
 	} else {
