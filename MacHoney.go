@@ -80,7 +80,7 @@ func main() {
 					ipTxt := fmt.Sprintf("%v", ip.SrcIP)
 					dstIP := fmt.Sprintf("%v", ip.DstIP)
 					// avoid broadcast traffic. Ensure that packet has a dstIP of us
-					if dstIP == config.interfaceip {
+					if dstIP == config.interfaceip && len(HabitualOffenders[ipTxt]) <= 0 {
 						// see if we have already flagged on this mofo
 						if fmt.Sprintf("%v", srcPort) != "443" {
 							fmt.Printf("Captured a probe at layer 3/4 %v:%v -> %v:%v\n\n", ip.SrcIP, srcPort, ip.DstIP, dstPort)
