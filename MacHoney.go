@@ -47,7 +47,22 @@ func main() {
 	for packet := range packetSource.Packets() {
 		dstMac := fmt.Sprintf("%v", packet.LinkLayer().LinkFlow().Dst())
 		srcMac := fmt.Sprintf("%v", packet.LinkLayer().LinkFlow().Src())
-		SynchMacList(srcMac)
+		splitstring := strings.Split(srcMac, ":")
+		firstByte := splitstring[0]
+		srcByteOne, err := hex.DecodeString(firstByte)
+		if err != nil {
+			fmt.Printf("%s\n", "Failed to obtain first byte of MAC")
+			SynchMacList(srcMac, false)
+		} else {
+			firstOctet := int(srcByteOne[0])
+			zip := firstOctet & 0x02
+			if zip == 0x02 {
+				SynchMacList(srcMac, true)
+			} else {
+				SynchMacList(srcMac, false)
+			}
+		}
+		
 		if packet.NetworkLayer() == nil  && srcMac != config.gatewaymac {
 			// handle just our ARP traffic first
 			now = time.Now()
