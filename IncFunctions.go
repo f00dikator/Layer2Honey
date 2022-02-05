@@ -158,7 +158,7 @@ func CheckArpCode (buf []byte) (int, string) {
 
 }
 
-func SynchMacList (macAddr string) {
+func SynchMacList (macAddr string, isLocal bool) {
 	for i := MacList.Front(); i != nil; i = i.Next() {
 		existingMac := fmt.Sprintf("%v", i.Value)
 		if existingMac == macAddr {
@@ -168,7 +168,11 @@ func SynchMacList (macAddr string) {
 	// resolve to a vendor
 	macVendor := getVendor(fmt.Sprintf("%v", macAddr))
 	time.Sleep(1 * time.Second)
-	fmt.Printf("New Mac Detected %v : %v\n", macAddr, macVendor)
+	if isLocal {
+		fmt.Printf("New Mac Detected %v : %v %s\n", macAddr, macVendor, "NOTE: local bit set. Subinterface or Fake!")
+	} else {
+		fmt.Printf("New Mac Detected %v : %v\n", macAddr, macVendor)
+	}
 	MacList.PushFront(macAddr)
 }
 
